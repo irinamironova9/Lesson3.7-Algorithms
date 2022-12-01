@@ -11,6 +11,10 @@ public class StringListImpl implements StringList {
     private final String[] strings;
     private int size;
 
+    public StringListImpl() {
+        this.strings = new String[10];
+    }
+
     public StringListImpl(int length) {
         if (length <= 0) {
             throw new IllegalArgumentException();
@@ -20,18 +24,19 @@ public class StringListImpl implements StringList {
 
     @Override
     public String add(String item) {
-        validateItem(item);
-        checkNotFull();
-        strings[size] = item;
-        size++;
-        return strings[size - 1];
+        return add(size, item);
     }
 
     @Override
     public String add(int index, String item) {
-        validateValues(index, item);
+        if (index > size) {
+            throw new IllegalArgumentException();
+        }
+        validateItem(item);
         checkNotFull();
-        System.arraycopy(strings, index, strings, index + 1, size - index - 1);
+        if (index < size) {
+            System.arraycopy(strings, index, strings, index + 1, size - index);
+        }
         strings[index] = item;
         size++;
         return strings[index];
@@ -47,16 +52,11 @@ public class StringListImpl implements StringList {
 
     @Override
     public String remove(String item) {
-        validateItem(item);
-        for (int i = 0; i < size; i++) {
-            if (strings[i].equals(item)) {
-                System.arraycopy(strings, i + 1, strings, i, size - 1 - i);
-                strings[size - 1] = null;
-                size--;
-                return item;
-            }
+        int index = indexOf(item);
+        if (index == -1) {
+            throw new ItemNotFoundException();
         }
-        throw new ItemNotFoundException();
+        return remove(index);
     }
 
     @Override
@@ -71,8 +71,7 @@ public class StringListImpl implements StringList {
 
     @Override
     public boolean contains(String item) {
-        validateItem(item);
-        return Arrays.asList(strings).contains(item);
+        return indexOf(item) != -1;
     }
 
     @Override
@@ -89,7 +88,7 @@ public class StringListImpl implements StringList {
     @Override
     public int lastIndexOf(String item) {
         validateItem(item);
-        for (int i = size - 1; i > 0; i--) {
+        for (int i = size - 1; i >= 0; i--) {
             if (strings[i].equals(item)) {
                 return i;
             }
@@ -132,7 +131,9 @@ public class StringListImpl implements StringList {
     @Override
     public void clear() {
         checkNotEmpty();
-        Arrays.stream(strings).forEach(this::remove);
+        for (int i = 0; i < size; i++) {
+            strings[i] = null;
+        }
         size = 0;
     }
 
