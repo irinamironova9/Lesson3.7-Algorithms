@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StringListImplTest {
 
-    StringList out;
+    StringListImpl out;
 
     @BeforeEach
     void setUp() {

@@ -2,112 +2,125 @@ package course3.lesson7_algorithms.IntegerList;
 
 import course3.lesson7_algorithms.StringList.StringList;
 import course3.lesson7_algorithms.StringList.StringListImpl;
+import course3.lesson7_algorithms.exception.ItemNotFoundException;
+import course3.lesson7_algorithms.exception.ListIsEmptyException;
+import course3.lesson7_algorithms.exception.NoSpaceLeftException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static course3.lesson7_algorithms.StringList.StringListImplTestConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class IntegerListImplTest {
 
-    private IntegerList out;
+    private static final Integer[] EXPECTED = new Integer[] {3, 8, 4};
+
+    private IntegerListImpl out;
 
     @BeforeEach
     void setUp() {
-        out = new IntegerListImpl(10);
+        out = new IntegerListImpl();
         out.add(3);
         out.add(8);
         out.add(4);
-        assertThat(out.size()).isEqualTo(3);
+        assertEquals(out.size(), 3);
+        assertArrayEquals(EXPECTED, out.toArray());
     }
 
     @Test
     void add() {
-        String actual = out.add(S_4);
-        assertEquals(S_4, actual);
-        assertEquals(S_4, out.get(3));
-        assertThat(out.size()).isEqualTo(4);
+        assertEquals(5, out.add(5));
+        assertEquals(5, out.get(3));
+        assertEquals(out.size(), 4);
     }
 
     @Test
     void addIndex() {
-        String actual = out.add(1, S_4);
-        assertEquals(S_4, actual);
-        assertEquals(S_4, out.get(1));
-        assertThat(out.size()).isEqualTo(4);
+        assertEquals(5, out.add(1, 5));
+        assertEquals(3, out.get(0));
+        assertEquals(5, out.get(1));
+        assertEquals(8, out.get(2));
+        assertEquals(4, out.get(3));
+        assertEquals(out.size(), 4);
     }
 
     @Test
     void set() {
-        assertThat(out.get(1)).isEqualTo(S_2);
-        String actual = out.set(1, S_4);
-        assertEquals(S_4, actual);
-        assertEquals(S_4, out.get(1));
-        assertThat(out.size()).isEqualTo(3);
+        assertEquals(8, out.get(1));
+        assertEquals(5, out.set(1, 5));
+        assertEquals(5, out.get(1));
+        assertEquals(out.size(), 3);
     }
 
     @Test
     void remove() {
-        String actual = out.remove(S_2);
-        assertEquals(S_2, actual);
-        assertThat(out.size()).isEqualTo(2);
-        assertEquals(S_3, out.get(1));
+        assertEquals(3, out.remove((Integer) 3));
+        assertEquals(out.size(), 2);
+        assertEquals(8, out.get(0));
     }
 
     @Test
     void removeIndex() {
-        String actual = out.remove(1);
-        assertEquals(S_2, actual);
-        assertThat(out.size()).isEqualTo(2);
-        assertEquals(S_3, out.get(1));
+        assertEquals(3, out.remove(0));
+        assertEquals(out.size(), 2);
+        assertEquals(8, out.get(0));
     }
 
     @Test
     void contains() {
-        assertTrue(out.contains(S_1));
-        assertFalse(out.contains("test"));
+        assertTrue(out.contains(4));
+        assertFalse(out.contains(7));
     }
 
     @Test
     void indexOf() {
-        assertThat(out.indexOf(S_1)).isEqualTo(0);
-        assertThat(out.indexOf(S_4)).isEqualTo(0);
-        assertThat(out.indexOf("test")).isEqualTo(-1);
+        out.add(3);
+        assertEquals(out.indexOf(3), 0);
+        assertEquals(out.indexOf(8), 1);
+        assertEquals(out.indexOf(4), 2);
+        assertEquals(out.indexOf(7), -1);
+    }
+
+    @Test
+    void sortAndBinarySearchIndexOf() {
+        assertEquals(out.sortAndBinarySearchIndexOf(3), 0);
+        assertEquals(out.sortAndBinarySearchIndexOf(4), 1);
+        assertEquals(out.sortAndBinarySearchIndexOf(8), 2);
     }
 
     @Test
     void lastIndexOf() {
-        out.add(S_4);
-        assertThat(out.lastIndexOf(S_1)).isEqualTo(3);
-        assertThat(out.lastIndexOf(S_4)).isEqualTo(3);
-        assertThat(out.lastIndexOf("test")).isEqualTo(-1);
+        out.add(3);
+        assertEquals(out.lastIndexOf(3), 3);
+        assertEquals(out.lastIndexOf(8), 1);
+        assertEquals(out.lastIndexOf(4), 2);
+        assertEquals(out.lastIndexOf(7), -1);
     }
 
     @Test
     void get() {
-        assertThat(out.get(0)).isEqualTo(S_1);
+        assertThat(out.get(0)).isEqualTo(3);
     }
 
     @Test
     void equalsList() {
-        StringList test1 = new StringListImpl(10);
-        test1.add(S_1);
-        test1.add(S_2);
-        test1.add(S_3);
+        IntegerList test1 = new IntegerListImpl(10);
+        test1.add(3);
+        test1.add(8);
+        test1.add(4);
         assertTrue(out.equals(test1));
 
-        StringList test2 = new StringListImpl(10);
-        test2.add(S_1);
-        assertFalse(out.equals(test2));
+        IntegerList test2 = new IntegerListImpl(5);
+        test2.add(3);
+        test2.add(8);
+        test2.add(4);
+        assertTrue(out.equals(test2));
 
-        StringList test3 = new StringListImpl(10);
+        IntegerList test3 = new IntegerListImpl(10);
+        test3.add(3);
         assertFalse(out.equals(test3));
 
-        StringList test4 = new StringListImpl(5);
-        test1.add(S_1);
-        test1.add(S_2);
-        test1.add(S_3);
+        IntegerList test4 = new IntegerListImpl(10);
         assertFalse(out.equals(test4));
     }
 
@@ -133,5 +146,31 @@ class IntegerListImplTest {
     @Test
     void toArray() {
         assertArrayEquals(EXPECTED, out.toArray());
+    }
+
+    @Test
+    void throwsNoSpaceLeftExceptionWhenListIsFull() {
+        IntegerList test = new IntegerListImpl(1);
+        test.add(1);
+        assertThrows(NoSpaceLeftException.class, () -> test.add(2));
+    }
+
+    @Test
+    void throwsItemNotFoundException() {
+        assertThrows(ItemNotFoundException.class, () -> out.remove((Integer) 7));
+    }
+
+    @Test
+    void throwsListIsEmptyException() {
+        StringList test = new StringListImpl(5);
+        assertThrows(ListIsEmptyException.class, test::clear);
+    }
+
+    @Test
+    void throwsIllegalArgumentExceptionWhenValuesAreNullOrUnacceptable() {
+        assertThrows(IllegalArgumentException.class, () -> out.set(-1, 5));
+        assertThrows(IllegalArgumentException.class, () -> out.set(3, 5));
+        assertThrows(IllegalArgumentException.class, () -> out.set(0, null));
+        assertThrows(IllegalArgumentException.class, () -> out.equals(null));
     }
 }
