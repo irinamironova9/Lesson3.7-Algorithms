@@ -3,6 +3,7 @@ package course3.lesson7_algorithms.IntegerList;
 import course3.lesson7_algorithms.exception.ItemNotFoundException;
 import course3.lesson7_algorithms.exception.ListIsEmptyException;
 import course3.lesson7_algorithms.exception.NoSpaceLeftException;
+import course3.lesson7_algorithms.sorting.SortComparison;
 
 import java.util.Arrays;
 
@@ -77,12 +78,7 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public int indexOf(Integer item) {
         validateItem(item);
-        for (int i = 0; i < size; i++) {
-            if (integers[i].equals(item)) {
-                return i;
-            }
-        }
-        return -1;
+        return binarySearch(item);
     }
 
     @Override
@@ -171,7 +167,33 @@ public class IntegerListImpl implements IntegerList {
         }
     }
 
-    private void sort() {
+    private int binarySearch(Integer item) {
+        sort();
+        int min = 0;
+        int max = size - 1;
+        while (min <= max) {
+            int mid = (min + max) / 2;
+            if (integers[mid] == item) {
+                return mid;
+            }
+            if (item < integers[mid]) {
+                max = mid - 1;
+            } else {
+                min = mid + 1;
+            }
+        }
+        return -1;
+    }
 
+    private void sort() {
+        for (int i = 0; i < size; i++) {
+            int tmp = integers[i];
+            int j = i;
+            while (j > 0 && integers[j - 1] >= tmp) {
+                integers[j] = integers[j - 1];
+                j--;
+            }
+            integers[j] = tmp;
+        }
     }
 }
