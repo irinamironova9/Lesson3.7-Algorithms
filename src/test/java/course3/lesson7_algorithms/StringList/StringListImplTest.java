@@ -1,5 +1,8 @@
 package course3.lesson7_algorithms.StringList;
 
+import course3.lesson7_algorithms.exception.ItemNotFoundException;
+import course3.lesson7_algorithms.exception.ListIsEmptyException;
+import course3.lesson7_algorithms.exception.NoSpaceLeftException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,51 +16,50 @@ class StringListImplTest {
 
     @BeforeEach
     void setUp() {
-        out = new StringListImpl(10);
+        out = new StringListImpl();
         out.add(S_1);
         out.add(S_2);
         out.add(S_3);
-        assertThat(out.size()).isEqualTo(3);
+        assertEquals(out.size(), 3);
+        assertArrayEquals(EXPECTED, out.toArray());
     }
 
     @Test
     void add() {
-        String actual = out.add(S_4);
-        assertEquals(S_4, actual);
+        assertEquals(S_4, out.add(S_4));
         assertEquals(S_4, out.get(3));
-        assertThat(out.size()).isEqualTo(4);
+        assertEquals(out.size(), 4);
     }
 
     @Test
     void addIndex() {
-        String actual = out.add(1, S_4);
-        assertEquals(S_4, actual);
+        assertEquals(S_4, out.add(1, S_4));
+        assertEquals(S_1, out.get(0));
         assertEquals(S_4, out.get(1));
-        assertThat(out.size()).isEqualTo(4);
+        assertEquals(S_2, out.get(2));
+        assertEquals(S_3, out.get(3));
+        assertEquals(out.size(), 4);
     }
 
     @Test
     void set() {
-        assertThat(out.get(1)).isEqualTo(S_2);
-        String actual = out.set(1, S_4);
-        assertEquals(S_4, actual);
+        assertEquals(S_2, out.get(1));
+        assertEquals(S_4, out.set(1, S_4));
         assertEquals(S_4, out.get(1));
-        assertThat(out.size()).isEqualTo(3);
+        assertEquals(out.size(), 3);
     }
 
     @Test
     void remove() {
-        String actual = out.remove(S_2);
-        assertEquals(S_2, actual);
-        assertThat(out.size()).isEqualTo(2);
+        assertEquals(S_2, out.remove(S_2));
+        assertEquals(out.size(), 2);
         assertEquals(S_3, out.get(1));
     }
 
     @Test
     void removeIndex() {
-        String actual = out.remove(1);
-        assertEquals(S_2, actual);
-        assertThat(out.size()).isEqualTo(2);
+        assertEquals(S_2, out.remove(1));
+        assertEquals(out.size(), 2);
         assertEquals(S_3, out.get(1));
     }
 
@@ -69,17 +71,21 @@ class StringListImplTest {
 
     @Test
     void indexOf() {
-        assertThat(out.indexOf(S_1)).isEqualTo(0);
-        assertThat(out.indexOf(S_4)).isEqualTo(0);
-        assertThat(out.indexOf("test")).isEqualTo(-1);
+        assertEquals(out.indexOf(S_1), 0);
+        assertEquals(out.indexOf(S_2), 1);
+        assertEquals(out.indexOf(S_3), 2);
+        assertEquals(out.indexOf(S_4), 0);
+        assertEquals(out.indexOf("test"), -1);
     }
 
     @Test
     void lastIndexOf() {
         out.add(S_4);
-        assertThat(out.lastIndexOf(S_1)).isEqualTo(3);
-        assertThat(out.lastIndexOf(S_4)).isEqualTo(3);
-        assertThat(out.lastIndexOf("test")).isEqualTo(-1);
+        assertEquals(out.lastIndexOf(S_1), 3);
+        assertEquals(out.lastIndexOf(S_2), 1);
+        assertEquals(out.lastIndexOf(S_3), 2);
+        assertEquals(out.lastIndexOf(S_4), 3);
+        assertEquals(out.lastIndexOf("test"), -1);
     }
 
     @Test
@@ -95,17 +101,17 @@ class StringListImplTest {
         test1.add(S_3);
         assertTrue(out.equals(test1));
 
-        StringList test2 = new StringListImpl(10);
+        StringList test2 = new StringListImpl(5);
         test2.add(S_1);
-        assertFalse(out.equals(test2));
+        test2.add(S_2);
+        test2.add(S_3);
+        assertTrue(out.equals(test2));
 
         StringList test3 = new StringListImpl(10);
+        test3.add(S_1);
         assertFalse(out.equals(test3));
 
-        StringList test4 = new StringListImpl(5);
-        test1.add(S_1);
-        test1.add(S_2);
-        test1.add(S_3);
+        StringList test4 = new StringListImpl(10);
         assertFalse(out.equals(test4));
     }
 
@@ -131,5 +137,31 @@ class StringListImplTest {
     @Test
     void toArray() {
         assertArrayEquals(EXPECTED, out.toArray());
+    }
+
+    @Test
+    void throwsNoSpaceLeftExceptionWhenListIsFull() {
+        StringList test = new StringListImpl(1);
+        test.add(S_1);
+        assertThrows(NoSpaceLeftException.class, () -> test.add(S_2));
+    }
+
+    @Test
+    void throwsItemNotFoundException() {
+        assertThrows(ItemNotFoundException.class, () -> out.remove("test"));
+    }
+
+    @Test
+    void throwsListIsEmptyException() {
+        StringList test = new StringListImpl(5);
+        assertThrows(ListIsEmptyException.class, test::clear);
+    }
+
+    @Test
+    void throwsIllegalArgumentExceptionWhenValuesAreNullOrUnacceptable() {
+        assertThrows(IllegalArgumentException.class, () -> out.set(-1, "test"));
+        assertThrows(IllegalArgumentException.class, () -> out.set(3, "test"));
+        assertThrows(IllegalArgumentException.class, () -> out.set(0, null));
+        assertThrows(IllegalArgumentException.class, () -> out.equals(null));
     }
 }
