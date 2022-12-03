@@ -2,13 +2,12 @@ package course3.lesson7_algorithms.IntegerList;
 
 import course3.lesson7_algorithms.exception.ItemNotFoundException;
 import course3.lesson7_algorithms.exception.ListIsEmptyException;
-import course3.lesson7_algorithms.exception.NoSpaceLeftException;
 
 import java.util.Arrays;
 
 public class IntegerListImpl implements IntegerList {
 
-    private final Integer[] integers;
+    private Integer[] integers;
     private int size;
 
     public IntegerListImpl() {
@@ -33,7 +32,7 @@ public class IntegerListImpl implements IntegerList {
             throw new IllegalArgumentException();
         }
         validateItem(item);
-        checkNotFull();
+        growIfFull();
         if (index < size) {
             System.arraycopy(integers, index, integers, index + 1, size - index);
         }
@@ -45,7 +44,6 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public Integer set(int index, Integer item) {
         validateValues(index, item);
-        checkNotFull();
         integers[index] = item;
         return integers[index];
     }
@@ -132,6 +130,15 @@ public class IntegerListImpl implements IntegerList {
         return size == 0;
     }
 
+    public boolean isSorted() {
+        for (int i = 0; i < size - 1; i++) {
+            if (integers[i] > integers[i + 1]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public void clear() {
         checkNotEmpty();
@@ -144,6 +151,41 @@ public class IntegerListImpl implements IntegerList {
     @Override
     public Integer[] toArray() {
         return Arrays.copyOf(integers, size);
+    }
+
+    public void quickSort() {
+        quickSort(0, size - 1);
+    }
+
+    private void quickSort(int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(begin, end);
+
+            quickSort(begin, partitionIndex - 1);
+            quickSort(partitionIndex + 1, end);
+        }
+    }
+
+    private int partition(int begin, int end) {
+        int pivot = this.integers[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (this.integers[j] <= pivot) {
+                i++;
+
+                swapElements(i, j);
+            }
+        }
+
+        swapElements(i + 1, end);
+        return i + 1;
+    }
+
+    private void swapElements(int left, int right) {
+        int temp = this.integers[left];
+        this.integers[left] = this.integers[right];
+        this.integers[right] = temp;
     }
 
     private void validateValues(int index, Integer item) {
@@ -160,12 +202,6 @@ public class IntegerListImpl implements IntegerList {
     private void validateItem(Integer item) {
         if (item == null) {
             throw new IllegalArgumentException();
-        }
-    }
-
-    private void checkNotFull() {
-        if (size == integers.length) {
-            throw new NoSpaceLeftException();
         }
     }
 
@@ -203,6 +239,14 @@ public class IntegerListImpl implements IntegerList {
                 j--;
             }
             integers[j] = tmp;
+        }
+    }
+
+    private void growIfFull() {
+        if (size == integers.length) {
+            Integer[] biggerArray = new Integer[this.size * 2];
+            System.arraycopy(this.integers, 0, biggerArray, 0, size);
+            this.integers = biggerArray;
         }
     }
 }

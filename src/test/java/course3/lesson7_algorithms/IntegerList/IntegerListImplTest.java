@@ -4,7 +4,6 @@ import course3.lesson7_algorithms.StringList.StringList;
 import course3.lesson7_algorithms.StringList.StringListImpl;
 import course3.lesson7_algorithms.exception.ItemNotFoundException;
 import course3.lesson7_algorithms.exception.ListIsEmptyException;
-import course3.lesson7_algorithms.exception.NoSpaceLeftException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class IntegerListImplTest {
 
     private static final Integer[] EXPECTED = new Integer[] {3, 8, 4};
+    private static final Integer[] EXPECTED_SORTED = new Integer[] {3, 4, 8};
 
     private IntegerListImpl out;
 
@@ -42,6 +42,14 @@ class IntegerListImplTest {
         assertEquals(8, out.get(2));
         assertEquals(4, out.get(3));
         assertEquals(out.size(), 4);
+    }
+
+    @Test
+    void shouldGrowWhenFull() {
+        IntegerListImpl test = new IntegerListImpl(1);
+        test.add(10);
+        test.add(20);
+        assertEquals(2, test.size());
     }
 
     @Test
@@ -149,10 +157,16 @@ class IntegerListImplTest {
     }
 
     @Test
-    void throwsNoSpaceLeftExceptionWhenListIsFull() {
-        IntegerList test = new IntegerListImpl(1);
-        test.add(1);
-        assertThrows(NoSpaceLeftException.class, () -> test.add(2));
+    void quickSort() {
+        out.quickSort();
+        assertArrayEquals(EXPECTED_SORTED, out.toArray());
+    }
+
+    @Test
+    void isSorted() {
+        assertFalse(out.isSorted());
+        out.quickSort();
+        assertTrue(out.isSorted());
     }
 
     @Test
